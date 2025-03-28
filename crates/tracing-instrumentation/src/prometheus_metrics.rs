@@ -17,6 +17,8 @@ use tokio::task::AbortHandle;
 use tokio::time::MissedTickBehavior;
 use tracing::{debug, trace};
 
+use crate::GLOBAL_NODE_ID;
+
 #[derive(Default)]
 pub struct Prometheus {
     handle: Option<PrometheusHandle>,
@@ -73,8 +75,16 @@ impl Prometheus {
         self.handle.as_ref()
     }
 
-    pub fn global_labels(&self) -> &Vec<String> {
-        &self.global_labels
+    pub fn global_labels(&self) -> Vec<String> {
+        let mut labels = self.global_labels.clone();
+        if let Some(node_id) = GLOBAL_NODE_ID.get() {
+            let plain_node_id = node_id.as_plain().to_string();
+            labels.push(format!(
+                "node_id=\"{}\"",
+                formatting::sanitize_label_value(&plain_node_id)
+            ));
+        }
+        labels
     }
 
     /// Starts the upkeep task. Should typically be run once, but it'll abort
