@@ -188,7 +188,7 @@ pub async fn render_metrics(State(state): State<NodeCtrlHandlerState>) -> String
     let manager = RocksDbManager::get();
     let all_dbs = manager.get_all_dbs();
 
-    let mut labels = state.prometheus_handle.global_labels();
+    let mut labels = state.prometheus_handle.global_labels().clone();
 
     // Overall write buffer manager stats
     format_rocksdb_property_for_prometheus(
